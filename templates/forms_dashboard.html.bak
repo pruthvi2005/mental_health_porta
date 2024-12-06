@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Patient Forms Dashboard</h2>
+    {% if current_user.is_authenticated and current_user.role == 'doctor' %}
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Mental Health Assessment Form</h5>
+                        <script type="text/javascript" src="https://form.jotform.com/jsform/243354416915054"></script>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Patient Information Form</h5>
+                        <script type="text/javascript" src="https://form.jotform.com/jsform/243354323845053"></script>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Medical History Form</h5>
+                        <script type="text/javascript" src="https://form.jotform.com/jsform/243321535855053"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            You must be logged in as a doctor to view this page.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
