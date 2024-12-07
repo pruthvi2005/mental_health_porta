@@ -8,7 +8,6 @@ import os
 from dotenv import load_dotenv
 import stripe
 import json
-from paytmchecksum import PaytmChecksum
 import requests
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
@@ -20,34 +19,32 @@ load_dotenv()
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 stripe_public_key = os.getenv('STRIPE_PUBLIC_KEY')
 
-# Paytm configuration
-PAYTM_MERCHANT_ID = os.getenv('PAYTM_MERCHANT_ID')
-PAYTM_MERCHANT_KEY = os.getenv('PAYTM_MERCHANT_KEY')
-PAYTM_WEBSITE = os.getenv('PAYTM_WEBSITE', 'WEBSTAGING')  # Use 'DEFAULT' for production
-PAYTM_INDUSTRY_TYPE = os.getenv('PAYTM_INDUSTRY_TYPE', 'Retail')
-PAYTM_CHANNEL_ID = os.getenv('PAYTM_CHANNEL_ID', 'WEB')
-PAYTM_CALLBACK_URL = os.getenv('PAYTM_CALLBACK_URL', 'http://localhost:5000/paytm-callback')
-
-# Function to generate Paytm checksum
-def generate_paytm_params(order_id, amount, user_id):
-    params = {
-        'MID': PAYTM_MERCHANT_ID,
-        'ORDER_ID': str(order_id),
-        'TXN_AMOUNT': str(amount),
-        'CUST_ID': str(user_id),
-        'INDUSTRY_TYPE_ID': PAYTM_INDUSTRY_TYPE,
-        'WEBSITE': PAYTM_WEBSITE,
-        'CHANNEL_ID': PAYTM_CHANNEL_ID,
-        'CALLBACK_URL': PAYTM_CALLBACK_URL,
-    }
+# Function to generate Paytm checksum (REMOVED)
+# def generate_paytm_params(order_id, amount, user_id):
+#     params = {
+#         'MID': PAYTM_MERCHANT_ID,
+#         'ORDER_ID': str(order_id),
+#         'TXN_AMOUNT': str(amount),
+#         'CUST_ID': str(user_id),
+#         'INDUSTRY_TYPE_ID': PAYTM_INDUSTRY_TYPE,
+#         'WEBSITE': PAYTM_WEBSITE,
+#         'CHANNEL_ID': PAYTM_CHANNEL_ID,
+#         'CALLBACK_URL': PAYTM_CALLBACK_URL,
+#     }
     
-    checksum = PaytmChecksum.generateSignature(params, PAYTM_MERCHANT_KEY)
-    params['CHECKSUMHASH'] = checksum
-    return params
+#     checksum = PaytmChecksum.generateSignature(params, PAYTM_MERCHANT_KEY)
+#     params['CHECKSUMHASH'] = checksum
+#     return params
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mental_health.db'
+
+# Configure SQLite database
+if os.getenv('FLASK_ENV') == 'production':
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///mental_health.db')
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mental_health.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
@@ -726,4 +723,4 @@ def profile():
     return render_template('profile.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
