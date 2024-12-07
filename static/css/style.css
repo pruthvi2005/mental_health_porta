@@ -190,6 +190,9 @@ body {
     background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: border-box;
+    -webkit-background-clip: border-box;
+    -moz-background-clip: border-box;
 }
 
 .stats-number {
@@ -240,4 +243,7 @@ body {
     background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: border-box;
+    -webkit-background-clip: border-box;
+    -moz-background-clip: border-box;
 }

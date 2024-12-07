@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
+    <!-- Chatbase Configuration -->
+    <script type="text/javascript">
+        window.embeddedChatbotConfig = {
+            chatbotId: "eBtthThWK3jAvvydL6lBB",
+            domain: "www.chatbase.co"
+        }
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -113,5 +120,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block extra_js %}{% endblock %}
+    <!-- Chatbase Integration -->
+    <script type="text/javascript"
+        src="https://www.chatbase.co/embed.min.js"
+        chatbotId="eBtthThWK3jAvvydL6lBB"
+        domain="www.chatbase.co"
+        defer>
+    </script>
 </body>
 </html>

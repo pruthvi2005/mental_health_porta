@@ -200,7 +200,13 @@ def before_request():
 # Routes
 @app.route('/')
 def home():
-    if 'user_id' in session:
+    # Initialize session if not exists
+    if 'user_id' not in session:
+        session['user_id'] = None
+        session['role'] = None
+        session['username'] = None
+    
+    if session['user_id']:
         user = User.query.get(session['user_id'])
         return render_template('index.html', user=user)
     return render_template('index.html')
@@ -723,4 +729,4 @@ def profile():
     return render_template('profile.html')
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(host='127.0.0.1', port=5501, debug=False)
