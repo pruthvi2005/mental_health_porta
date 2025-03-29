@@ -1,54 +1,33 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, and_
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime, timedelta
-import os
-from dotenv import load_dotenv
 import stripe
 import json
 import requests
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Stripe configuration
+# Initialize Stripe
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 stripe_public_key = os.getenv('STRIPE_PUBLIC_KEY')
-
-# Function to generate Paytm checksum (REMOVED)
-# def generate_paytm_params(order_id, amount, user_id):
-#     params = {
-#         'MID': PAYTM_MERCHANT_ID,
-#         'ORDER_ID': str(order_id),
-#         'TXN_AMOUNT': str(amount),
-#         'CUST_ID': str(user_id),
-#         'INDUSTRY_TYPE_ID': PAYTM_INDUSTRY_TYPE,
-#         'WEBSITE': PAYTM_WEBSITE,
-#         'CHANNEL_ID': PAYTM_CHANNEL_ID,
-#         'CALLBACK_URL': PAYTM_CALLBACK_URL,
-#     }
-    
-#     checksum = PaytmChecksum.generateSignature(params, PAYTM_MERCHANT_KEY)
-#     params['CHECKSUMHASH'] = checksum
-#     return params
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
-# Configure SQLite database
-if os.getenv('FLASK_ENV') == 'production':
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///mental_health.db')
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mental_health.db'
-
+# Database configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///mental_health.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 # Initialize extensions
-db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -58,7 +37,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Models
-class User(UserMixin, db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
@@ -217,25 +196,17 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        if not username or not password:
-            flash('Please enter both username and password', 'error')
-            return redirect(url_for('login'))
-        
         user = User.query.filter_by(username=username).first()
-        print(f"Login attempt - Username: {username}")
-        print(f"User found: {user is not None}")
         
         if user and check_password_hash(user.password, password):
+            login_user(user)
             session['user_id'] = user.id
-            session['username'] = user.username
             session['role'] = user.role
-            print(f"Login successful - Role: {user.role}")
-            flash('Welcome back!', 'success')
+            session['username'] = user.name or user.username  # Use name if available, otherwise username
+            flash('Logged in successfully!', 'success')
             return redirect(url_for('home'))
         else:
-            print("Login failed - Invalid password")
-            flash('Invalid username or password', 'error')
-            return redirect(url_for('login'))
+            flash('Invalid username or password.', 'danger')
     
     return render_template('login.html')
 
@@ -247,6 +218,7 @@ def signup():
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
         role = request.form.get('role', 'patient')
+        name = request.form.get('name', username)  # Use username as default name if not provided
         
         if not all([username, email, password, confirm_password]):
             flash('Please fill in all fields', 'error')
@@ -269,7 +241,8 @@ def signup():
             username=username,
             email=email,
             password=hashed_password,
-            role=role
+            role=role,
+            name=name
         )
         
         try:
@@ -380,8 +353,10 @@ def cancel_appointment(appointment_id):
     return redirect(url_for('appointments'))
 
 @app.route('/self_help')
-@login_required
 def self_help():
+    if not session.get('user_id'):
+        flash('Please log in to access self-help resources', 'info')
+        return redirect(url_for('login'))
     return render_template('self_help.html')
 
 @app.route('/self_help/sleep')
@@ -729,4 +704,4 @@ def profile():
     return render_template('profile.html')
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5501, debug=False)
+    app.run(host='127.0.0.1', port=5000, debug=False)

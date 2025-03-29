@@ -247,3 +247,25 @@ body {
     -webkit-background-clip: border-box;
     -moz-background-clip: border-box;
 }
+
+/* Hover Card Styles */
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.hover-card a {
+    color: inherit;
+}
+
+.hover-card:hover .bi {
+    transform: scale(1.1);
+}
+
+.hover-card .bi {
+    transition: transform 0.3s ease;
+}

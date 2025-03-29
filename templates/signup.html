@@ -37,6 +37,12 @@
 
                         <form method="POST" action="{{ url_for('signup') }}">
                             <div class="mb-4">
+                                <label for="name" class="form-label">
+                                    <i class="bi bi-person-badge me-2"></i>Full Name
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name">
+                            </div>
+                            <div class="mb-4">
                                 <label for="username" class="form-label">
                                     <i class="bi bi-person me-2"></i>Username
                                 </label>
@@ -85,9 +91,9 @@
         </div>
     </div>
 
-    <footer class="footer">
+    <footer class="footer mt-auto py-3 bg-light">
         <div class="container text-center">
-            <p>&copy; 2024 Mental Health Portal. All rights reserved.</p>
+            <p class="mb-0">&copy; 2024 Mental Health Portal. All rights reserved.</p>
         </div>
     </footer>
 
